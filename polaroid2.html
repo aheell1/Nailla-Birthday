@@ -27,10 +27,13 @@
       margin: 50px auto;
       padding: 20px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row; /* pics side by side */
+      justify-content: space-between;
       gap: 40px;
+      flex-wrap: wrap; /* responsive ke liye */
     }
     .image-section {
+      flex: 1;
       display: flex;
       justify-content: flex-end;
       animation: fadeInRight 1.5s ease;
@@ -57,7 +60,7 @@
     }
     .continue-btn {
       display: block;
-      margin: 250px auto;
+      margin: 100px auto 50px auto; /* button ko niche push kar diya */
       padding: 12px 30px;
       background: #6a4e93;
       color: white;
@@ -87,6 +90,10 @@
     }
 
     @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
       .image-section, .image-section.left {
         justify-content: center;
       }
@@ -100,13 +107,13 @@
   <div class="container">
     <div class="image-section">
       <div class="polaroid">
-        <img src="refpic2.jpeg" alt="Memory 1">
+        <img src="refpic2.jpg" alt="Memory 1">
       </div>
     </div>
 
     <div class="image-section left">
       <div class="polaroid">
-        <img src="refpic3.jpeg" alt="Memory 2">
+        <img src="refpic3.jpg" alt="Memory 2">
       </div>
     </div>
   </div>
