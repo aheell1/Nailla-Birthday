@@ -46,7 +46,7 @@
       position: absolute;  
       font-size: 150px;  
       left: 50%;  
-      top: 42%;   /* 38% → 42% */  
+      top: 42%;  
       transform: translateX(-50%);  
       text-shadow: 0 0 15px rgba(0,0,0,0.3);  
       z-index: 5;  
@@ -55,7 +55,7 @@
     /* Age (Stylish + position adjusted) */  
     .age {  
       position: absolute;  
-      top: 20%;   /* 28% → 24% */  
+      top: 20%;  
       left: 50%;  
       transform: translateX(-50%);  
       font-size: 120px;  
@@ -159,4 +159,88 @@
         ctx.fill();  
         ctx.beginPath();  
         ctx.arc(-this.size * 0.2, -this.size * 0.3, this.size * 0.15, 0, Math.PI * 2);  
-        ctx.fillStyle = "rgba(255,255,255,0
+        ctx.fillStyle = "rgba(255,255,255,0.6)";  
+        ctx.fill();  
+        ctx.restore();  
+        ctx.beginPath();  
+        ctx.moveTo(this.x, this.y + this.size);  
+        ctx.lineTo(this.x - 5, this.y + this.size + 10);  
+        ctx.lineTo(this.x + 5, this.y + this.size + 10);  
+        ctx.closePath();  
+        ctx.fillStyle = this.color;  
+        ctx.fill();  
+      }  
+      update() {  
+        this.y -= this.speed;  
+        this.x += Math.sin(this.angle) * 0.5;  
+        this.angle += 0.02;  
+        if (this.y + this.size < -50) {  
+          this.y = height + 50;  
+          this.side = Math.random() < 0.5 ? 'left' : 'right';  
+          this.x = this.side === 'left'  
+            ? Math.random() * (width * 0.3)  
+            : width * 0.7 + Math.random() * (width * 0.3);  
+        }  
+        this.draw();  
+      }  
+    }  
+  
+    class Confetti {  
+      constructor() {  
+        this.side = Math.random() < 0.5 ? 'left' : 'right';  
+        this.x = this.side === 'left'  
+          ? Math.random() * (width * 0.3)  
+          : width * 0.7 + Math.random() * (width * 0.3);  
+        this.y = Math.random() * -height;  
+        this.size = 6 + Math.random() * 4;  
+        this.color = confettiColors[Math.floor(Math.random() * confettiColors.length)];  
+        this.speed = 2 + Math.random() * 3;  
+        this.angle = Math.random() * Math.PI * 2;  
+        this.rotationSpeed = (Math.random() - 0.5) * 0.2;  
+      }  
+      draw() {  
+        ctx.save();  
+        ctx.translate(this.x, this.y);  
+        ctx.rotate(this.angle);  
+        ctx.fillStyle = this.color;  
+        ctx.fillRect(-this.size/2, -this.size*2, this.size, this.size*4);  
+        ctx.restore();  
+      }  
+      update() {  
+        this.y += this.speed;  
+        this.angle += this.rotationSpeed;  
+        if (this.y > height + 20) {  
+          this.y = -20;  
+          this.side = Math.random() < 0.5 ? 'left' : 'right';  
+          this.x = this.side === 'left'  
+            ? Math.random() * (width * 0.3)  
+            : width * 0.7 + Math.random() * (width * 0.3);  
+        }  
+        this.draw();  
+      }  
+    }  
+  
+    function init() {  
+      for (let i = 0; i < 20; i++) balloons.push(new Balloon());  
+      for (let i = 0; i < 80; i++) confetti.push(new Confetti());  
+    }  
+  
+    function animate() {  
+      ctx.clearRect(0, 0, width, height);  
+      balloons.forEach(b => b.update());  
+      confetti.forEach(c => c.update());  
+      requestAnimationFrame(animate);  
+    }  
+  
+    init();  
+    animate();  
+  
+    window.addEventListener('resize', () => {  
+      width = window.innerWidth;  
+      height = window.innerHeight;  
+      canvas.width = width;  
+      canvas.height = height;  
+    });  
+  </script>  
+</body>  
+</html>
