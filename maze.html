@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Maze</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f9f4ef;
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+    }
+    h2.instructions {
+      color: #6a4e93;
+      margin-bottom: 15px;
+      font-weight: 600;
+      text-align: center;
+    }
+    #maze {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      background: #ffffff;
+      border: 5px solid #6a4e93;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+    .wall {
+      position: absolute;
+      background: #6a4e93;
+    }
+    #player {
+      position: absolute;
+      font-size: 32px;
+      transition: left 0.1s linear, top 0.1s linear;
+      z-index: 5;
+    }
+    #goal {
+      position: absolute;
+      font-size: 34px;
+    }
+    #popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease;
+      z-index: 20;
+    }
+    #popup.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .popup-content {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 20px;
+      text-align: center;
+      color: #2e1d47;
+      transform: scale(0.8);
+      animation: popIn 0.5s forwards;
+    }
+    .popup-content h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+    }
+    .popup-content button {
+      background: #6a4e93;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .popup-content button:hover {
+      background: #533b75;
+      transform: translateY(-3px);
+    }
+    @keyframes popIn {
+      from {transform: scale(0.8); opacity:0;}
+      to {transform: scale(1); opacity:1;}
+    }
+  </style>
+</head>
+<body>
+  <h2 class="instructions">Help the heart find its way — swipe, drag or use the arrows </h2>
+  <div id="maze">
+    <!-- Maze walls -->
+    <div class="wall" style="top: 80px; left: 0; width: 300px; height: 20px;"></div>
+    <div class="wall" style="top: 160px; left: 100px; width: 300px; height: 20px;"></div>
+    <div class="wall" style="top: 240px; left: 0; width: 300px; height: 20px;"></div>
+
+    <!-- Player & Goal -->
+    <div id="player" style="top: 10px; left: 10px;">❤️</div>
+    <div id="goal" style="bottom: 10px; right: 10px;">💖</div>
+  </div>
+
+  <!-- Popup -->
+  <div id="popup">
+    <div class="popup-content">
+      <h2>Found my way to you ❤️</h2>
+      <button onclick="window.location.href='balloons.html'">Continue →</button>
+    </div>
+  </div>
+
+<script>
+  const player = document.getElementById("player");
+  const goal = document.getElementById("goal");
+  const popup = document.getElementById("popup");
+  const walls = document.querySelectorAll(".wall");
+
+  let playerPos = { top: 10, left: 10 };
+  const step = 20;
+
+  // ---- Movement common function ----
+  function movePlayer(key) {
+    let newTop = playerPos.top;
+    let newLeft = playerPos.left;
+
+    if (key === "ArrowUp") newTop -= step;
+    if (key === "ArrowDown") newTop += step;
+    if (key === "ArrowLeft") newLeft -= step;
+    if (key === "ArrowRight") newLeft += step;
+
+    // collision detection
+    let playerRect = { top: newTop, left: newLeft, width: 28, height: 28 };
+    let collides = false;
+    walls.forEach(w => {
+      const wallRect = w.getBoundingClientRect();
+      const mazeRect = w.parentNode.getBoundingClientRect();
+      const wall = {
+        top: wallRect.top - mazeRect.top,
+        left: wallRect.left - mazeRect.left,
+        width: wallRect.width,
+        height: wallRect.height
+      };
+      if (
+        playerRect.left < wall.left + wall.width &&
+        playerRect.left + playerRect.width > wall.left &&
+        playerRect.top < wall.top + wall.height &&
+        playerRect.top + playerRect.height > wall.top
+      ) {
+        collides = true;
+      }
+    });
+
+    if (!collides && newTop >= 0 && newLeft >= 0 &&
+        newTop <= 400 - 28 && newLeft <= 400 - 28) {
+      playerPos = { top: newTop, left: newLeft };
+      player.style.top = playerPos.top + "px";
+      player.style.left = playerPos.left + "px";
+    }
+
+    // goal check
+    const goalRect = goal.getBoundingClientRect();
+    const mazeRect = goal.parentNode.getBoundingClientRect();
+    const gx = goalRect.left - mazeRect.left;
+    const gy = goalRect.top - mazeRect.top;
+    const gw = goalRect.width, gh = goalRect.height;
+
+    if (
+      playerPos.left < gx + gw &&
+      playerPos.left + 28 > gx &&
+      playerPos.top <
