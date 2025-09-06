@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Untold Memories</title>
+  <title>Legendary PFPs</title>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -23,36 +23,21 @@
       animation: fadeInDown 1.5s ease;
     }
     .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
       max-width: 900px;
       margin: 50px auto;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
       gap: 40px;
     }
-    .text-section {
-      flex: 1;
-      min-width: 300px;
-      font-size: 1.1rem;
-      line-height: 1.6;
-      animation: fadeInLeft 1.5s ease;
-      text-align: center;
-    }
-    .stylish-text {
-      font-family: 'Dancing Script', cursive;
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #6a4e93;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-      margin: 15px 0;
-    }
     .image-section {
-      flex: 1;
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
       animation: fadeInRight 1.5s ease;
+    }
+    .image-section.left {
+      justify-content: flex-start;
+      animation: fadeInLeft 1.5s ease;
     }
     .polaroid {
       background: white;
@@ -60,9 +45,10 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       transform: rotate(-3deg);
       transition: transform 0.4s ease;
+      max-width: 300px;
     }
     .polaroid img {
-      max-width: 50%;
+      width: 100%;
       height: auto;
       display: block;
     }
@@ -101,36 +87,31 @@
     }
 
     @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        text-align: center;
-      }
-      .text-section, .image-section {
-        animation: none;
+      .image-section, .image-section.left {
+        justify-content: center;
       }
     }
   </style>
 </head>
 <body>
 
-  <h1>UNTOLD MEMORIES</h1>
+  <h1>LEGENDARY PFPS</h1>
+
   <div class="container">
-    <div class="text-section">
-      <p class="stylish-text">If</p>
-      <p class="stylish-text">Tujhe bhulna to chaha</p>
-      <p class="stylish-text">Lekin bhula na paye</p>
-      <p class="Had a face</p>
-
-    </div>
-
     <div class="image-section">
       <div class="polaroid">
-        <img src="refpic2.jpeg" alt="Memory">
+        <img src="refpic2.jpeg" alt="Memory 1">
+      </div>
+    </div>
+
+    <div class="image-section left">
+      <div class="polaroid">
+        <img src="refpic3.jpeg" alt="Memory 2">
       </div>
     </div>
   </div>
 
-  <button class="continue-btn" onclick="window.location.href='hkk.html'">
+  <button class="continue-btn" onclick="window.location.href='polaroid3.html'">
     Continue →
   </button>
 
