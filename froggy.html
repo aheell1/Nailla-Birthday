@@ -8,12 +8,12 @@
     body {
       margin: 0;
       height: 100vh;
-      background: linear-gradient(180deg, #f5f0e6, #fffaf4); /* background copied */
+      background: linear-gradient(180deg, #f5f0e6, #fffaf4);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: 'Poppins', sans-serif; /* font copied */
+      font-family: 'Poppins', sans-serif;
     }
 
     h2#instructions {
@@ -32,18 +32,26 @@
       position: relative;
       width: 400px;
       height: 500px;
-      background: #fffaf4; /* copied */
+      background: #fffaf4;
       border: 3px solid #d2b48c;
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
 
+    /* Water area */
+    #water {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 80px;
+      background: #4da6ff;
+    }
+
     .frog {
       position: absolute;
       bottom: 140px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 180px;
       font-size: 42px;
     }
 
@@ -55,7 +63,7 @@
       background: #8fcf7f;
     }
 
-    /* Popup (copied style) */
+    /* Popup */
     #popup {
       display: none;
       position: absolute;
@@ -84,27 +92,32 @@
       background: #c1a177;
     }
 
-    /* Continue button always visible */
+    /* Continue button (purple with arrow) */
     #continueBtn {
       margin-top: 15px;
       padding: 10px 20px;
       border: none;
       border-radius: 10px;
-      background: #d2b48c;
+      background: #7b2cbf; /* purple */
       color: white;
       font-size: 16px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     #continueBtn:hover {
-      background: #c1a177;
+      background: #6920a8;
     }
   </style>
 </head>
 <body>
-  <h2 id="instructions">Press Space / Tap to jump 🐸</h2>
+  <h2 id="instructions">Use ← ↑ → keys or tap to jump & move 🐸</h2>
 
   <div id="gameArea">
     <div class="frog" id="frog">🐸</div>
+    <div id="water"></div>
+
     <div id="popup">
       <h2 id="popupMsg">NAILLA GIR GAYI 🥹</h2>
       <button onclick="restart()">Play Again</button>
@@ -112,7 +125,9 @@
   </div>
 
   <!-- Always visible continue button -->
-  <button id="continueBtn" onclick="goToFinal()">Continue</button>
+  <button id="continueBtn" onclick="goToFinal()">
+    Continue ➡
+  </button>
 
   <script>
     const gameArea = document.getElementById("gameArea");
@@ -120,8 +135,9 @@
     const popup = document.getElementById("popup");
     const popupMsg = document.getElementById("popupMsg");
 
-    const GAME_H = 500, GAME_W = 400;
+    const GAME_W = 400;
     let vy = 0, gravity = 0.6, isJumping = false, running = true;
+    let vx = 0, frogX = 180;
     let pads = [];
 
     function createPad(x, y) {
@@ -139,10 +155,12 @@
       createPad(150, 120);
       createPad(50, 220);
       createPad(220, 320);
-      createPad(150, 420); // last pad = island
+      createPad(150, 420); // last pad
       frog.style.bottom = "140px";
-      frog.style.left = "50%";
+      frogX = 180;
+      frog.style.left = frogX + "px";
       vy = 0;
+      vx = 0;
       isJumping = false;
       running = true;
       popup.style.display = "none";
@@ -156,6 +174,16 @@
       }
     }
 
+    function moveLeft() {
+      vx = -4;
+    }
+    function moveRight() {
+      vx = 4;
+    }
+    function stopX() {
+      vx = 0;
+    }
+
     function gameOver(message) {
       running = false;
       popupMsg.textContent = message;
@@ -164,39 +192,45 @@
 
     function restart() {
       initGame();
+      requestAnimationFrame(loop);
     }
 
     function goToFinal() {
-      alert("Continue button clicked!");
-      // yahan ap final.html ya dusre page pr le ja sakte ho
+      window.location.href = "final.html";
     }
 
-    // Simple physics loop
     function loop() {
       if (!running) return;
 
       let frogBottom = parseFloat(frog.style.bottom);
       vy -= gravity;
       frogBottom += vy;
-      if (frogBottom < 0) {
-        frogBottom = 0;
+      frogX += vx;
+
+      // boundaries
+      if (frogX < 0) frogX = 0;
+      if (frogX > GAME_W - 40) frogX = GAME_W - 40;
+
+      if (frogBottom < 80) { // fell in water
         gameOver("NAILLA GIR GAYI 🥹");
       }
+
       frog.style.bottom = frogBottom + "px";
+      frog.style.left = frogX + "px";
 
       // check landing
-      const frogX = frog.offsetLeft + frog.offsetWidth / 2;
+      const frogMidX = frogX + frog.offsetWidth / 2;
       const frogY = frogBottom;
 
       for (let p of pads) {
         const padY = parseFloat(p.el.style.bottom);
         if (frogY <= padY + 25 && frogY >= padY - 5) {
-          if (frogX > p.x && frogX < p.x + p.w) {
+          if (frogMidX > p.x && frogMidX < p.x + p.w) {
             isJumping = false;
             vy = 0;
             frog.style.bottom = padY + 25 + "px";
 
-            // check if last pad (island)
+            // last pad = win
             if (padY >= 420) {
               gameOver("You made it to Kashmir 🪻");
             }
@@ -209,10 +243,16 @@
 
     // Controls
     window.addEventListener("keydown", e => {
-      if (e.code === "Space") jump();
+      if (e.code === "Space" || e.code === "ArrowUp") jump();
+      if (e.code === "ArrowLeft") moveLeft();
+      if (e.code === "ArrowRight") moveRight();
     });
+    window.addEventListener("keyup", e => {
+      if (e.code === "ArrowLeft" || e.code === "ArrowRight") stopX();
+    });
+
+    // Tap for jump
     gameArea.addEventListener("click", jump);
-    gameArea.addEventListener("touchstart", e => { e.preventDefault(); jump(); }, {passive:false});
 
     initGame();
     requestAnimationFrame(loop);
