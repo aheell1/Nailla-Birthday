@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heart Catcher</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(180deg, #f5f0e6, #fffaf4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    h2#instructions {
+      font-size: 24px;
+      margin-bottom: 10px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: rgba(210, 180, 140, 0.2);
+      color: #7b2cbf;   /* Purple text color */
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    #gameArea {
+      position: relative;
+      width: 400px;
+      height: 500px;
+      background: #fffaf4;
+      border: 3px solid #d2b48c;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 30px;
+      animation: fall 4s linear forwards;
+      color: #e75480;
+    }
+
+    @keyframes fall {
+      0% { top: -40px; }
+      100% { top: 500px; }
+    }
+
+    .basket {
+      position: absolute;
+      bottom: 10px;
+      left: 170px;
+      font-size: 40px;
+      transition: left 0.15s ease-in-out;
+    }
+
+    /* Pop-up */
+    #popup {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(245,240,230,0.95);
+      border: 2px solid #d2b48c;
+      padding: 30px 50px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+    #popup button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #d2b48c;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #popup button:hover {
+      background: #c1a177;
+    }
+  </style>
+</head>
+<body>
+  <!-- ! hataya aur purple color apply hua -->
+  <h2 id="instructions">Collect hearts using Arrow Keys or Swipe</h2>
+  
+  <div id="gameArea">
+    <div class="basket" id="basket">🧺</div>
+    <div id="popup">
+      <h2>You collected all ❤</h2>
+      <button onclick="goToFinal()">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById('gameArea');
+    const basket = document.getElementById('basket');
+    const popup = document.getElementById('popup');
+
+    let basketPos = 170;
+    let collected = 0;
+    const totalHearts = 30;  // total falling hearts
+    const targetCollect = 8; // required to win
+
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.innerHTML = '❤';
+      heart.style.left = Math.random() * 370 + 'px';
+      gameArea.appendChild(heart);
+
+      let fallInterval = setInterval(() => {
+        const heartTop = parseInt(window.getComputedStyle(heart).top);
+        const heartLeft = parseInt(window.getComputedStyle(heart).left);
+        const basketLeft = basketPos;
+        const basketRight = basketPos + 40;
+
+        if (heartTop > 450 && heartLeft > basketLeft - 10 && heartLeft < basketRight + 40) {
+          heart.remove();
+          collected++;
+          clearInterval(fallInterval);
+          if (collected === targetCollect) {
+            setTimeout(() => popup.style.display = 'block', 300);
+          }
+        } else if (heartTop > 480) {
+          heart.remove();
+          clearInterval(fallInterval);
+        }
+      }, 50);
+    }
+
+    function startGame() {
+      for (let i = 0; i < totalHearts; i++) {
+        setTimeout(createHeart, i * 1000);
+      }
+    }
+
+    // Keyboard Controls
+    window.addEventListener('keydown', (e) => {
+      if (e.key === "ArrowLeft") moveLeft();
+      if (e.key === "ArrowRight") moveRight();
+    });
+
+    function moveLeft() {
+      basketPos = Math.max(basketPos - 30, 0);
+      basket.style.left = basketPos + 'px';
+    }
+    function moveRight() {
+      basketPos = Math.min(basketPos + 30, 360);
+      basket.style.left = basketPos + 'px';
+    }
+
+    // Swipe Controls (for mobile)
+    let touchStartX = null;
+    gameArea.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].clientX;
+    });
+
+    gameArea.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      if (touchStartX && Math.abs(touchEndX - touchStartX) > 30) {
+        if (touchEndX < touchStartX) moveLeft();
+        else moveRight();
+      }
+      touchStartX = null;
+    });
+
+    function goToFinal() {
+      window.location.href = 'final.html';
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
