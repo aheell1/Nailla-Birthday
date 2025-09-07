@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lily Jump</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(180deg, #f5f0e6, #fffaf4); /* background copied */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif; /* font copied */
+    }
+
+    h2#instructions {
+      font-size: 22px;
+      margin-bottom: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(210, 180, 140, 0.2);
+      color: #7b2cbf;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    #gameArea {
+      position: relative;
+      width: 400px;
+      height: 500px;
+      background: #fffaf4; /* copied */
+      border: 3px solid #d2b48c;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .frog {
+      position: absolute;
+      bottom: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 42px;
+    }
+
+    .pad {
+      position: absolute;
+      width: 100px;
+      height: 20px;
+      border-radius: 10px;
+      background: #8fcf7f;
+    }
+
+    /* Popup (copied style) */
+    #popup {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(245,240,230,0.95);
+      border: 2px solid #d2b48c;
+      padding: 30px 50px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+    #popup button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #d2b48c;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #popup button:hover {
+      background: #c1a177;
+    }
+
+    /* Continue button always visible */
+    #continueBtn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #d2b48c;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #continueBtn:hover {
+      background: #c1a177;
+    }
+  </style>
+</head>
+<body>
+  <h2 id="instructions">Press Space / Tap to jump 🐸</h2>
+
+  <div id="gameArea">
+    <div class="frog" id="frog">🐸</div>
+    <div id="popup">
+      <h2 id="popupMsg">NAILLA GIR GAYI 🥹</h2>
+      <button onclick="restart()">Play Again</button>
+    </div>
+  </div>
+
+  <!-- Always visible continue button -->
+  <button id="continueBtn" onclick="goToFinal()">Continue</button>
+
+  <script>
+    const gameArea = document.getElementById("gameArea");
+    const frog = document.getElementById("frog");
+    const popup = document.getElementById("popup");
+    const popupMsg = document.getElementById("popupMsg");
+
+    const GAME_H = 500, GAME_W = 400;
+    let vy = 0, gravity = 0.6, isJumping = false, running = true;
+    let pads = [];
+
+    function createPad(x, y) {
+      const pad = document.createElement("div");
+      pad.className = "pad";
+      pad.style.left = x + "px";
+      pad.style.bottom = y + "px";
+      gameArea.appendChild(pad);
+      pads.push({ el: pad, x, y, w: 100 });
+    }
+
+    function initGame() {
+      pads.forEach(p => p.el.remove());
+      pads = [];
+      createPad(150, 120);
+      createPad(50, 220);
+      createPad(220, 320);
+      createPad(150, 420); // last pad = island
+      frog.style.bottom = "140px";
+      frog.style.left = "50%";
+      vy = 0;
+      isJumping = false;
+      running = true;
+      popup.style.display = "none";
+    }
+
+    function jump() {
+      if (!running) return;
+      if (!isJumping) {
+        vy = 12;
+        isJumping = true;
+      }
+    }
+
+    function gameOver(message) {
+      running = false;
+      popupMsg.textContent = message;
+      popup.style.display = "block";
+    }
+
+    function restart() {
+      initGame();
+    }
+
+    function goToFinal() {
+      alert("Continue button clicked!");
+      // yahan ap final.html ya dusre page pr le ja sakte ho
+    }
+
+    // Simple physics loop
+    function loop() {
+      if (!running) return;
+
+      let frogBottom = parseFloat(frog.style.bottom);
+      vy -= gravity;
+      frogBottom += vy;
+      if (frogBottom < 0) {
+        frogBottom = 0;
+        gameOver("NAILLA GIR GAYI 🥹");
+      }
+      frog.style.bottom = frogBottom + "px";
+
+      // check landing
+      const frogX = frog.offsetLeft + frog.offsetWidth / 2;
+      const frogY = frogBottom;
+
+      for (let p of pads) {
+        const padY = parseFloat(p.el.style.bottom);
+        if (frogY <= padY + 25 && frogY >= padY - 5) {
+          if (frogX > p.x && frogX < p.x + p.w) {
+            isJumping = false;
+            vy = 0;
+            frog.style.bottom = padY + 25 + "px";
+
+            // check if last pad (island)
+            if (padY >= 420) {
+              gameOver("You made it to Kashmir 🪻");
+            }
+          }
+        }
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    // Controls
+    window.addEventListener("keydown", e => {
+      if (e.code === "Space") jump();
+    });
+    gameArea.addEventListener("click", jump);
+    gameArea.addEventListener("touchstart", e => { e.preventDefault(); jump(); }, {passive:false});
+
+    initGame();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
