@@ -112,7 +112,7 @@
   </style>
 </head>
 <body>
-  <h2 id="instructions">Use ← ↑ → keys or tap to jump & move 🐸</h2>
+  <h2 id="instructions">Use ← ↑ → keys or tap screen zones 🐸</h2>
 
   <div id="gameArea">
     <div class="frog" id="frog">🐸</div>
@@ -241,7 +241,7 @@
       requestAnimationFrame(loop);
     }
 
-    // Controls
+    // Keyboard controls
     window.addEventListener("keydown", e => {
       if (e.code === "Space" || e.code === "ArrowUp") jump();
       if (e.code === "ArrowLeft") moveLeft();
@@ -251,8 +251,24 @@
       if (e.code === "ArrowLeft" || e.code === "ArrowRight") stopX();
     });
 
-    // Tap for jump
-    gameArea.addEventListener("click", jump);
+    // Touch controls (3 zones)
+    gameArea.addEventListener("touchstart", e => {
+      const touchX = e.touches[0].clientX;
+      const rect = gameArea.getBoundingClientRect();
+      const relativeX = touchX - rect.left;
+
+      if (relativeX < GAME_W / 3) {
+        moveLeft();  // left zone
+      } else if (relativeX > 2 * GAME_W / 3) {
+        moveRight(); // right zone
+      } else {
+        jump();      // middle zone
+      }
+    });
+
+    gameArea.addEventListener("touchend", e => {
+      stopX(); // stop movement when touch lifted
+    });
 
     initGame();
     requestAnimationFrame(loop);
